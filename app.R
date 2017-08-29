@@ -3,10 +3,12 @@
 library(shiny)
 library(shinythemes)
 library(Gviz)
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-library(org.Hs.eg.db)
+library(shinyWidgets)
+#library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+#library(org.Hs.eg.db)
 library(BSgenome.Hsapiens.UCSC.hg19)
-load("grgenes_symbols.rda");load("grgenes.rda")
+load("grgenes_symbols.rda");load("grgenes.rda");load("epic450anno.rda")
+source("cgbrowseR_functions.R")
 
 ui <- fluidPage(theme=shinytheme("cerulean"),
                 titlePanel(title=div(HTML(paste(h1("CpG MappeR"))))),
@@ -19,11 +21,33 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                                    uiOutput("startcoor"),
                                    uiOutput("endcoor"),
                                    uiOutput("chrgene"),
-                                   checkboxGroupInput("trackoptions",
-                                               label=h5("Track options (default: Genome Coordinates; Ideogram; CG dinucleotides)"),
-                                               choices=c("Ensembl Genes (BioMart/UCSC)" = 1,
-                                                         "CpG Islands (UCSC)" = 2,
-                                                         "GC Content (UCSC)" = 3)),
+                                   dropdownButton(checkboxGroupInput("arraytracks",
+                                                                     label="",
+                                                                     choices=c("Illumina Array CpGs (EPIC)" = 1,
+                                                                               "Illumina Array CpGs (HM450)" = 2,
+                                                                               "Promoter CpGs (TSS1500)" = 3,
+                                                                               "Promoter Array CpGs (TSS200)" = 4,
+                                                                               "Body Array CpGs (Body)" = 5,
+                                                                               "Body Array CpGs (1stExon)" = 6,
+                                                                               "Promoter Array CpGs (5'UTR)" = 7,
+                                                                               "NTR Array CpGs (3'UTR)" = 8,
+                                                                               "Body CpGs (ExonBnd)" = 9),
+                                                                     selected=c("1","2","3","4","5","6","7","8","9")),
+                                                  circle=FALSE,
+                                                  label=h5("Illumina CpG Tracks"),width=2),
+                                   dropdownButton(checkboxGroupInput("trackoptions",
+                                               label=h5(""),
+                                               choices=c(
+                                                 "Ensembl Genes (fast)" = 1,
+                                                 "UCSC RefGenes (slow)" = 2,
+                                                 "CpG Islands (slow)" = 3,
+                                                 "GC Content (slow)" = 4),
+                                               selected=c("1")),
+                                               circle=FALSE,
+                                               label=h5("Genome Tracks"),width=2),
+                                   dropdownButton(numericInput("gvizwidth", label = h5("Image Width (pixels)"), value = 1000),
+                                                  numericInput("gvizheight", label = h5("Image Height (pixels)"), value = 750),
+                                                  circle=FALSE,label=h5("Plot Dimensions"),width=2),
                                    actionButton("viewgenome", "View Genome"),
                                    downloadButton('dncgtable_download.csv', 'Download CG Coordinates')
                                    
@@ -31,9 +55,9 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                 ),
                 mainPanel(
                   tabsetPanel(
-                    tabPanel("Genome Visualization",htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),
-                             htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2)
-                    , id = "conditionedPanels"
+                    tabPanel("Genome Visualization",htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
+                    tabPanel("Sequence CG Table",htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2),
+                    id = "conditionedPanels"
                   )
                 )
 )
@@ -126,29 +150,20 @@ server <- function(input, output) {
       #====================================
       # get sequence, make cg track/table
       #====================================
-      seqall <- getSeq(BSgenome.Hsapiens.UCSC.hg19,
-                       start=windowrange.start,
-                       end=windowrange.end,
-                       names=windowrange.chr)
-      xseq.list <- unlist(strsplit(as.character(seqall),""))
-      dndf <- data.frame(dnseq=paste0(xseq.list[1:length(xseq.list)-1],xseq.list[2:length(xseq.list)]),
-                         seq.coor.start=seq(1,length(xseq.list)-1,1),
-                         chr.coor.start=c(windowrange.start,windowrange.start+seq(1,length(xseq.list)-2,1)),
-                         chr.coor=paste0(windowrange.chr,
-                                         ":",
-                                         c(windowrange.start,windowrange.start+seq(1,length(xseq.list)-2,1)),
-                                         "-",
-                                         c(windowrange.start,windowrange.start+seq(1,length(xseq.list)-2,1))+1),
-                         stringsAsFactors = FALSE)
-      dndf$val <- ifelse(dndf$dnseq %in% c("CG","GC"),1,0)
-      #dndf[(dndf$start=="C" & dndf$end=="G")|
-      #       (dndf$start=="G" & dndf$end=="C"),]$val <- 1
-      #table(dndf$val)
+      dndf.all <- getAllDNseq(windowrange.start = input$startcoorload,
+                          windowrange.end = input$endcoorload,
+                          windowrange.chr = input$chrgeneload)
+      dndf.cg.return <- getCGtable(windowrange.start = input$startcoorload,
+                                   windowrange.end = input$endcoorload,
+                                   windowrange.chr = input$chrgeneload,
+                                   dndf=dndf.all)
       
       # make GRanges obj from CG dinucleotide df for gviz
       grcg <- GRanges(seqnames=windowrange.chr,
-                      ranges=IRanges(start=dndf$chr.coor.start,
-                                     end=dndf$chr.coor.start+1),mcols=dndf$val)
+                      ranges=IRanges(start=dndf.all$chr.coor.start,
+                                     end=dndf.all$chr.coor.start+1),
+                      mcols=dndf.all$val)
+      
       dTrack.cg <- DataTrack(start=start(grcg),
                              end=end(grcg),
                              data=mcols(grcg)[,1],
@@ -160,14 +175,175 @@ server <- function(input, output) {
                              showColorBar=FALSE,
                              ncolor=2,
                              col.axis=NULL)
-      tracklistusr <- c(tracklistusr,dTrack.cg); tracksizesusr <- c(tracksizesusr,1)
       
-      # cg table to be returned in output
-      dndf.cg <- dndf[dndf$val==1,c(1,2,4)]
+      tracklistusr <- c(tracklistusr,dTrack.cg); tracksizesusr <- c(tracksizesusr,1)
       
       #==================================
       # Evaluate checkbox optional tracks
       #==================================
+      
+      if(length(intersect(c("1","2","3","4","5"),input$arraytracks))>0){
+        dndf.array <- dndf.cg.return[!is.na(dndf.cg.return$array),]
+        epic450dndf <- epic450anno[dndf.array[!is.na(dndf.array$cpg.id),]$cpg.id,]
+      }
+      
+      # Array tracks
+      if("1" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("epic",epic450dndf$array),]
+        if(nrow(ddf)>0){
+        dTrack.cpg1 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                               data=rep(1,nrow(ddf)),
+                               chromosome=windowrange.chr,
+                               genome="hg19",
+                               name="EPIC CpGs",
+                               type="gradient",
+                               showColorBar=FALSE,
+                               ncolor=2,
+                               col.axis=NULL,
+                               gradient=rep("red",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg1); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("2" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("hm450",epic450dndf$array),]
+        if(nrow(ddf)>0){
+        dTrack.cpg2 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="HM450 CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("purple",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg2); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("3" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("TSS1500",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+          dTrack.cpg3 <- DataTrack(start=ddf$pos,
+                                   end=ddf$pos+1,
+                                   data=rep(1,nrow(ddf)),
+                                   chromosome=windowrange.chr,
+                                   genome="hg19",
+                                   name="TSS1500 CpGs",
+                                   type="gradient",
+                                   showColorBar=FALSE,
+                                   ncolor=2,
+                                   col.axis=NULL,
+                                   gradient=rep("darkolivegreen",nrow(ddf)))
+          tracklistusr <- c(tracklistusr,dTrack.cpg3); tracksizesusr <- c(tracksizesusr,1)
+        }
+        
+      }
+      if("4" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("TSS200",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+          dTrack.cpg4 <- DataTrack(start=ddf$pos,
+                                   end=ddf$pos+1,
+                                   data=rep(1,nrow(ddf)),
+                                   chromosome=windowrange.chr,
+                                   genome="hg19",
+                                   name="TSS200 CpGs",
+                                   type="gradient",
+                                   showColorBar=FALSE,
+                                   ncolor=2,
+                                   col.axis=NULL,
+                                   gradient=rep("darkolivegreen2",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg4); tracksizesusr <- c(tracksizesusr,1)
+      }
+      }
+      if("5" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("Body",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+        dTrack.cpg5 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="Body CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("gold",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg5); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("6" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("1stExon",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+        dTrack.cpg6 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="1stExon CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("orange",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg6); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("7" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("5'UTR",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+        dTrack.cpg7 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="5'UTR CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("darkslategray1",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg7); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("8" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("3'UTR",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+        dTrack.cpg8 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="3'UTR CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("dodgerblue2",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg8); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      if("9" %in% input$arraytracks){
+        ddf <- epic450dndf[grep("ExonBnd",epic450dndf$UCSC_RefGene_Group),]
+        if(nrow(ddf)>0){
+        dTrack.cpg9 <- DataTrack(start=ddf$pos,
+                                 end=ddf$pos+1,
+                                 data=rep(1,nrow(ddf)),
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="ExonBnd CpGs",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient=rep("lightcyan3",nrow(ddf)))
+        tracklistusr <- c(tracklistusr,dTrack.cpg9); tracksizesusr <- c(tracksizesusr,1)
+        }
+      }
+      
+      
       # gene transcripts track
       if("1" %in% input$trackoptions){
         biomTrack <- BiomartGeneRegionTrack(genome = "hg19",
@@ -178,9 +354,18 @@ server <- function(input, output) {
                                             stacking="full")
         tracklistusr <- c(tracklistusr,biomTrack); tracksizesusr <- c(tracksizesusr,3)
       }
+      if("2" %in% input$trackoptions){
+        refGenes <- UcscTrack(genome = "hg19", chromosome = windowrange.chr,
+                              track = "xenoRefGene", from = windowrange.start, to = windowrange.end,
+                              trackType = "GeneRegionTrack", rstarts = "exonStarts",
+                              rends = "exonEnds", gene = "name", symbol = "name2",
+                              transcript = "name", strand = "strand", fill = "#8282d2",
+                              stacking = "full", name = "RefSeq")
+        tracklistusr <- c(tracklistusr,refGenes); tracksizesusr <- c(tracksizesusr,3)
+      }
       
       # misc refgene tracks from ucsc
-      if("2" %in% input$trackoptions){
+      if("3" %in% input$trackoptions){
         cpgIslands <- UcscTrack(genome = "hg19", chromosome = windowrange.chr,
                                 track = "cpgIslandExt", from = windowrange.start, to = windowrange.end,
                                 trackType = "AnnotationTrack", start = "chromStart",
@@ -189,7 +374,7 @@ server <- function(input, output) {
         tracklistusr <- c(tracklistusr,cpgIslands); tracksizesusr <- c(tracksizesusr,1)
       }
       
-      if("3" %in% input$trackoptions){
+      if("4" %in% input$trackoptions){
         gcContent <- UcscTrack(genome = "hg19", chromosome = windowrange.chr,
                                track = "GC Percent", table = "gc5Base", from = windowrange.start,
                                to = windowrange.end, trackType = "DataTrack", start = "start",
@@ -209,12 +394,21 @@ server <- function(input, output) {
       })
       
       # plot genome visualization
-      output$genomeviz <- renderPlot(
+      output$genomeviz <- renderPlot({
+        withProgress(message = 'Calculation in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       for (i in 1:15) {
+                         incProgress(1/15)
+                         Sys.sleep(0.25)
+                       }
+                     })
         plotTracks(tracklistusr, 
                    from = windowrange.start, 
                    to = windowrange.end, 
                    cex = 0.8,
                    sizes=tracksizesusr)
+      },
+      height=input$gvizheight,width=input$gvizwidth
       )
       
       # cg coordinates table title
@@ -224,8 +418,9 @@ server <- function(input, output) {
       })
       
       # cg coordinates data table
-      output$cgtable <- renderDataTable(
-        dndf.cg
+      output$cgtable <- renderDataTable({
+        dndf.cg.return
+      }
       )
       
       
@@ -233,7 +428,7 @@ server <- function(input, output) {
       output$dncgtable_download.csv <- downloadHandler(
         filename = function() { paste0(input$cgtable,'.csv') },
         content = function(file) {
-          write.csv(dndf.cg, file,row.names=FALSE)
+          write.csv(dndf.cg.return, file,row.names=FALSE)
         }
       )
       
