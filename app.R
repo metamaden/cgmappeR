@@ -62,18 +62,32 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                                                            label=HTML(paste0(h6("Genome"),"\n",h6("Tracks"))),
                                                            width=2,
                                                            size="sm")),
-                                            column(4,dropdownButton(numericInput("gvizwidth", 
-                                                                                 label = h5("Image Width (pixels)"), 
-                                                                                 value = 1000),
-                                                                    numericInput("gvizheight", 
-                                                                                 label = h5("Image Height (pixels)"), 
-                                                                                 value = 750),
+                                            column(4,dropdownButton(checkboxInput("cursortrack", 
+                                                                                  "Cursor Track", 
+                                                                                  value = FALSE, 
+                                                                                  width = NULL),
+                                                                    numericInput("cursorstart", 
+                                                                                 label = h5("Start Coor."), 
+                                                                                 value = 0),
+                                                                    numericInput("cursorend", 
+                                                                                 label = h5("End Coor."), 
+                                                                                 value = 0),
                                                                     circle=FALSE,
-                                                                    label=HTML(paste0(h6("Plot"),"\n",h6("Dimensions"))),
+                                                                    label=HTML(paste0(h6("Cursor"))),
                                                                     width=2))),
+                                   dropdownButton(numericInput("gvizwidth", 
+                                                               label = h5("Image Width (pixels)"), 
+                                                               value = 1000),
+                                                  numericInput("gvizheight", 
+                                                               label = h5("Image Height (pixels)"), 
+                                                               value = 750),
+                                                  circle=FALSE,
+                                                  label=HTML(paste0(h6("Plot Dimensions"))),
+                                                  width=2),
                                    HTML('<hr style="color: purple;">'),
                                    actionButton("viewgenome", "View Genome"),
                                    downloadButton('dncgtable_download.csv', 'Download CG Table'),
+                                   downloadButton('cpgprobetable_download.csv', 'Download CpG Probe Table'),
                                    HTML('<hr style="color: purple;">'),
                                    dropdownButton(helpText(h4("Citations:")),
                                                   helpText(h6("This is a shiny app written in R. It relies heavily on several Bioconductor packages, including Gviz, BSgenome.Hsapiens.UCSC.hg19, org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg19.knownGene, and manifests accessible in minfi. This app was designed using the shiny, shinythemes, and shinyWidgets packages.")),
@@ -87,9 +101,14 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                 ),
                 mainPanel(
                   tabsetPanel(
-                    tabPanel("Genome Visualization",htmlOutput("tracks.selected"),htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
-                    tabPanel("Sequence CG Table",htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2),
-                    #tabPanel("Sequence Queried",htmlOutput("txtgenomeviz"),htmlOutput("txtseq"), value=2),
+                    tabPanel("Ideogram",htmlOutput("tracks.selected"),htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
+                    tabPanel("CG Table",htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2),
+                    tabPanel("CpG Probes Table",htmlOutput("cpgtable.title"),dataTableOutput("cpgtable"), value=2),
+                    tabPanel("Sequence",
+                             htmlOutput("txtgenomeviz.seq"),
+                             wellPanel(id = "tPanel",style = "overflow-y:scroll; max-height: 600px",
+                                       htmlOutput("txtseq")), 
+                             value=2),
                     id = "conditionedPanels"
                   )
                 )
@@ -100,9 +119,9 @@ server <- function(input, output) {
     windowsize.current <- input$endcoorload-input$startcoorload
     paste0("\nWindow Size (bp):\n",windowsize.current)
   })
-  
   output$tracks.selected <- renderUI({
     names.selectedtracks <- c("ideogram","genome_coordinates","CGs")
+    cursortrack <- c("Cursor")
     arraytracknames <- c("Array CpGs (EPIC)",
                          "Array CpGs (HM450)",
                          "Promoter CpGs (TSS1500)",
@@ -117,12 +136,25 @@ server <- function(input, output) {
                           "CpG Islands (slow)",
                           "GC Content (slow)")
     names.selectedtracks <- paste(c(names.selectedtracks,
+                                    cursortrack[c(as.numeric(input$cursortrack))],
                                   arraytracknames[c(as.numeric(input$arraytracks))],
                                   genometracknames[c(as.numeric(input$trackoptions))]),
                                   collapse="; ")
     
-    paste0("Tracks Selected:\n",names.selectedtracks)
+    paste0("Tracks Selected:",names.selectedtracks)
   })
+  output$txtgenomeviz.seq <- renderUI({
+    paste0("Coordinates: ",input$chrgeneload,":",input$startcoorload,"-",input$endcoorload)
+  })
+  output$txtseq <- renderUI({
+    if(input$startcoorload<=input$endcoorload){
+      txtseqtxt <- as.character(getSeq(BSgenome.Hsapiens.UCSC.hg19,
+                                       start=input$startcoorload,
+                                       end=input$endcoorload,
+                                       names=input$chrgeneload))
+      paste(unlist(strsplit(txtseqtxt,"")),collapse='')
+    }
+  },outputArgs=list(inline=TRUE))
   
   # GET GENE COORDINATES/OTHER INFO
   geneinfoevent <- observeEvent(input$getgeneinfo,{
@@ -219,21 +251,14 @@ server <- function(input, output) {
       # get sequence, make cg track/table
       #====================================
       
-     # output$txtseq <- renderUI({
-     #   paste0("\nSequence:\n",
-     #          as.character(getSeq(BSgenome.Hsapiens.UCSC.hg19,
-      #                             start=input$startcoorload,
-      #                             end=input$endcoorload,
-      #                             names=input$chrgeneload)))
-      #})
-      
       dndf.all <- getAllDNseq(windowrange.start = input$startcoorload,
                           windowrange.end = input$endcoorload,
                           windowrange.chr = input$chrgeneload)
       dndf.cg.return <- getCGtable(windowrange.start = input$startcoorload,
                                    windowrange.end = input$endcoorload,
                                    windowrange.chr = input$chrgeneload,
-                                   dndf=dndf.all,epic450anno = epic450anno)
+                                   dndf=dndf.all,
+                                   epic450anno = epic450anno)
       
       # make GRanges obj from CG dinucleotide df for gviz
       grcg <- GRanges(seqnames=windowrange.chr,
@@ -259,6 +284,23 @@ server <- function(input, output) {
       # Evaluate checkbox optional tracks
       #==================================
       
+      # cursor track
+      if(input$cursortrack){
+        cursortrack <- DataTrack(start=input$cursorstart,
+                                 end=input$cursorend,
+                                 data=1,
+                                 chromosome=windowrange.chr,
+                                 genome="hg19",
+                                 name="Cursor",
+                                 type="gradient",
+                                 showColorBar=FALSE,
+                                 ncolor=2,
+                                 col.axis=NULL,
+                                 gradient="black")
+        tracklistusr <- c(tracklistusr,cursortrack); tracksizesusr <- c(tracksizesusr,1)
+      }
+      
+      # cpg array tracks
       if(length(intersect(c("1","2","3","4","5"),input$arraytracks))>0){
         dndf.array <- dndf.cg.return[!is.na(dndf.cg.return$array),]
         epic450dndf <- epic450anno[dndf.array[!is.na(dndf.array$cpg.id),]$cpg.id,]
@@ -496,24 +538,37 @@ server <- function(input, output) {
       height=input$gvizheight,width=input$gvizwidth
       )
       
-      # cg coordinates table title
+      # cg coordinates table and title
       output$cgtable.title <- renderUI({
         str.gviz <- paste0("CG Coordinates Table at: ",windowrange.chr,":",windowrange.start,"-",windowrange.end)
         HTML(paste(h4(str.gviz)))
       })
-      
-      # cg coordinates data table
       output$cgtable <- renderDataTable({
         dndf.cg.return
-      }
-      )
+      })
+      
+      # cpg probe table and title
+      output$cpgtable.title <- renderUI({
+        str.gviz <- paste0("CpG Probe Annotations at: ",windowrange.chr,":",windowrange.start,"-",windowrange.end)
+        HTML(paste(h4(str.gviz)))
+      })
+      output$cpgtable <- renderDataTable({
+        epic450anno[dndf.cg.return[!is.na(dndf.cg.return$cpg.id),]$cpg.id,]
+      })
       
       
-      # enable download for current selected table in csv format
+      # enable download for current selected CG dn. table in csv format
       output$dncgtable_download.csv <- downloadHandler(
         filename = function() { paste0(input$cgtable,'.csv') },
         content = function(file) {
           write.csv(dndf.cg.return, file,row.names=FALSE)
+        }
+      )
+      # enable download for current selected CpG probe table in csv format
+      output$cpgprobetable_download.csv <- downloadHandler(
+        filename = function() { paste0(input$cpgtable,'.csv') },
+        content = function(file) {
+          write.csv(epic450anno[dndf.cg.return[!is.na(dndf.cg.return$cpg.id),]$cpg.id,], file,row.names=FALSE)
         }
       )
       
