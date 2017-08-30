@@ -16,7 +16,7 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                   conditionalPanel(condition="input.conditionedPanels==2",
                                    helpText("Visualize CG dinucleotides, with tracks indicating coverage by CpG array probes, gene transcripts, and genome features."),
                                    dropdownButton(helpText(h5("1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.")),
-                                                  helpText(h5("2. Using dropdown menus, select tracks to visualize and fine tune image dimensions.")),
+                                                  helpText(h5("2. Using dropdown menus, select tracks to visualize and fine tune image dimensions. (Note: CpG tracks are only shown if CpGs overlap with view window)")),
                                                   helpText(h5("3. Click View Genome button to load the genome ideogram at the indicated coordinates. (Note: this may take awhile)")),
                                                   helpText(h5("4. View resultant ideogram (first tab) and CG dinucleotide table (second tab). Download the image by right-clicking, and download the table using the download button.")),
                                                   circle=FALSE,
@@ -89,6 +89,7 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                   tabsetPanel(
                     tabPanel("Genome Visualization",htmlOutput("tracks.selected"),htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
                     tabPanel("Sequence CG Table",htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2),
+                    #tabPanel("Sequence Queried",htmlOutput("txtgenomeviz"),htmlOutput("txtseq"), value=2),
                     id = "conditionedPanels"
                   )
                 )
@@ -217,13 +218,22 @@ server <- function(input, output) {
       #====================================
       # get sequence, make cg track/table
       #====================================
+      
+     # output$txtseq <- renderUI({
+     #   paste0("\nSequence:\n",
+     #          as.character(getSeq(BSgenome.Hsapiens.UCSC.hg19,
+      #                             start=input$startcoorload,
+      #                             end=input$endcoorload,
+      #                             names=input$chrgeneload)))
+      #})
+      
       dndf.all <- getAllDNseq(windowrange.start = input$startcoorload,
                           windowrange.end = input$endcoorload,
                           windowrange.chr = input$chrgeneload)
       dndf.cg.return <- getCGtable(windowrange.start = input$startcoorload,
                                    windowrange.end = input$endcoorload,
                                    windowrange.chr = input$chrgeneload,
-                                   dndf=dndf.all)
+                                   dndf=dndf.all,epic450anno = epic450anno)
       
       # make GRanges obj from CG dinucleotide df for gviz
       grcg <- GRanges(seqnames=windowrange.chr,
