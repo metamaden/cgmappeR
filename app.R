@@ -11,51 +11,83 @@ load("grgenes_symbols.rda");load("grgenes.rda");load("epic450anno.rda")
 source("cgbrowseR_functions.R")
 
 ui <- fluidPage(theme=shinytheme("cerulean"),
-                titlePanel(title=div(HTML(paste(h1("CpG MappeR"))))),
-                sidebarPanel(
+                titlePanel(title=div(HTML(paste(h1("CGMappeR"))))),
+                sidebarPanel(width=4,
                   conditionalPanel(condition="input.conditionedPanels==2",
-                                   helpText(h3("Genome Visualization")),
-                                   helpText("This tab displays a genome visualization"),
+                                   helpText("Visualize CG dinucleotides, with tracks indicating coverage by CpG array probes, gene transcripts, and genome features."),
+                                   dropdownButton(helpText(h5("1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.")),
+                                                  helpText(h5("2. Using dropdown menus, select tracks to visualize and fine tune image dimensions.")),
+                                                  helpText(h5("3. Click View Genome button to load the genome ideogram at the indicated coordinates. (Note: this may take awhile)")),
+                                                  helpText(h5("4. View resultant ideogram (first tab) and CG dinucleotide table (second tab). Download the image by right-clicking, and download the table using the download button.")),
+                                                  circle=FALSE,
+                                                  label=h6("Instructions"),width="500px",size="xs"),
+                                   HTML('<hr style="color: black;">'),
                                    textInput("genesym2", label = h5("Gene Symbol"), value = ""),
                                    actionButton("loadgenecoordinates", "Load Gene Coordinates"),
-                                   uiOutput("startcoor"),
-                                   uiOutput("endcoor"),
-                                   uiOutput("chrgene"),
-                                   dropdownButton(checkboxGroupInput("arraytracks",
-                                                                     label="",
-                                                                     choices=c("Illumina Array CpGs (EPIC)" = 1,
-                                                                               "Illumina Array CpGs (HM450)" = 2,
-                                                                               "Promoter CpGs (TSS1500)" = 3,
-                                                                               "Promoter Array CpGs (TSS200)" = 4,
-                                                                               "Body Array CpGs (Body)" = 5,
-                                                                               "Body Array CpGs (1stExon)" = 6,
-                                                                               "Promoter Array CpGs (5'UTR)" = 7,
-                                                                               "NTR Array CpGs (3'UTR)" = 8,
-                                                                               "Body CpGs (ExonBnd)" = 9),
-                                                                     selected=c("1","2","3","4","5","6","7","8","9")),
-                                                  circle=FALSE,
-                                                  label=h5("Illumina CpG Tracks"),width=2),
-                                   dropdownButton(checkboxGroupInput("trackoptions",
-                                               label=h5(""),
-                                               choices=c(
-                                                 "Ensembl Genes (fast)" = 1,
-                                                 "UCSC RefGenes (slow)" = 2,
-                                                 "CpG Islands (slow)" = 3,
-                                                 "GC Content (slow)" = 4),
-                                               selected=c("1")),
-                                               circle=FALSE,
-                                               label=h5("Genome Tracks"),width=2),
-                                   dropdownButton(numericInput("gvizwidth", label = h5("Image Width (pixels)"), value = 1000),
-                                                  numericInput("gvizheight", label = h5("Image Height (pixels)"), value = 750),
-                                                  circle=FALSE,label=h5("Plot Dimensions"),width=2),
+                                   HTML('<hr style="color: black;">'),
+                                   fluidRow(column(5,dropdownButton(uiOutput("startcoor"),
+                                                                    uiOutput("endcoor"),
+                                                                    uiOutput("chrgene"),
+                                                                    circle=FALSE,
+                                                                    label=HTML(paste0(h6("Coordinates"))),
+                                                                    width=20,
+                                                                    size="sm")),
+                                            column(7,uiOutput("windowsize"))),
+                                   HTML('<hr style="color: black;">'),
+                                   fluidRow(column(3,dropdownButton(checkboxGroupInput("arraytracks",
+                                                                              label="",
+                                                                              choices=c("Array CpGs (EPIC)" = 1,
+                                                                                        "Array CpGs (HM450)" = 2,
+                                                                                        "Promoter CpGs (TSS1500)" = 3,
+                                                                                        "Promoter CpGs (TSS200)" = 4,
+                                                                                        "Body CpGs (Body)" = 5,
+                                                                                        "Body CpGs (1stExon)" = 6,
+                                                                                        "Promoter CpGs (5'UTR)" = 7,
+                                                                                        "NTR CpGs (3'UTR)" = 8,
+                                                                                        "Body CpGs (ExonBnd)" = 9),
+                                                                              selected=c("1","2","3","4","5","6","7","8","9")),
+                                                           circle=FALSE,
+                                                           label=HTML(paste0(h6("CpG"),"\n",h6("Tracks"))),
+                                                           width=2,
+                                                           size="sm")),
+                                            column(4,dropdownButton(checkboxGroupInput("trackoptions",
+                                                                              label=h5(""),
+                                                                              choices=c(
+                                                                                "Ensembl Genes (fast)" = 1,
+                                                                                "UCSC RefGenes (slow)" = 2,
+                                                                                "CpG Islands (slow)" = 3,
+                                                                                "GC Content (slow)" = 4),
+                                                                              selected=c("1")),
+                                                           circle=FALSE,
+                                                           label=HTML(paste0(h6("Genome"),"\n",h6("Tracks"))),
+                                                           width=2,
+                                                           size="sm")),
+                                            column(4,dropdownButton(numericInput("gvizwidth", 
+                                                                                 label = h5("Image Width (pixels)"), 
+                                                                                 value = 1000),
+                                                                    numericInput("gvizheight", 
+                                                                                 label = h5("Image Height (pixels)"), 
+                                                                                 value = 750),
+                                                                    circle=FALSE,
+                                                                    label=HTML(paste0(h6("Plot"),"\n",h6("Dimensions"))),
+                                                                    width=2))),
+                                   HTML('<hr style="color: purple;">'),
                                    actionButton("viewgenome", "View Genome"),
-                                   downloadButton('dncgtable_download.csv', 'Download CG Coordinates')
-                                   
+                                   downloadButton('dncgtable_download.csv', 'Download CG Table'),
+                                   HTML('<hr style="color: purple;">'),
+                                   dropdownButton(helpText(h4("Citations:")),
+                                                  helpText(h6("This is a shiny app written in R. It relies heavily on several Bioconductor packages, including Gviz, BSgenome.Hsapiens.UCSC.hg19, org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg19.knownGene, and manifests accessible in minfi. This app was designed using the shiny, shinythemes, and shinyWidgets packages.")),
+                                                  helpText(h4("Disclaimer:")),
+                                                  helpText(h6("CGMappeR, including its code and generated results, is free to use for research purposes. It is offered with absolutely no warranty or guarantee, and it is the responsibility of the user to verify and/or validate any findings from using CGMappeR.")),
+                                                  helpText(h4("Thanks for your interest in this project, and happy mapping!")),
+                                                  circle=FALSE,
+                                                  label=h6("More Info"),
+                                                  width="500px")
                   )
                 ),
                 mainPanel(
                   tabsetPanel(
-                    tabPanel("Genome Visualization",htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
+                    tabPanel("Genome Visualization",htmlOutput("tracks.selected"),htmlOutput("txtgenomeviz"),plotOutput("genomeviz"),value=2),
                     tabPanel("Sequence CG Table",htmlOutput("cgtable.title"),dataTableOutput("cgtable"), value=2),
                     id = "conditionedPanels"
                   )
@@ -63,6 +95,33 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
 )
 
 server <- function(input, output) {
+  output$windowsize <- renderUI({
+    windowsize.current <- input$endcoorload-input$startcoorload
+    paste0("\nWindow Size (bp):\n",windowsize.current)
+  })
+  
+  output$tracks.selected <- renderUI({
+    names.selectedtracks <- c("ideogram","genome_coordinates","CGs")
+    arraytracknames <- c("Array CpGs (EPIC)",
+                         "Array CpGs (HM450)",
+                         "Promoter CpGs (TSS1500)",
+                         "Promoter CpGs (TSS200)",
+                         "Body CpGs (Body)",
+                         "Body CpGs (1stExon)",
+                         "Promoter CpGs (5'UTR)",
+                         "NTR CpGs (3'UTR)",
+                         "Body CpGs (ExonBnd)")
+    genometracknames <- c("Ensembl Genes (fast)",
+                          "UCSC RefGenes (slow)",
+                          "CpG Islands (slow)",
+                          "GC Content (slow)")
+    names.selectedtracks <- paste(c(names.selectedtracks,
+                                  arraytracknames[c(as.numeric(input$arraytracks))],
+                                  genometracknames[c(as.numeric(input$trackoptions))]),
+                                  collapse="; ")
+    
+    paste0("Tracks Selected:\n",names.selectedtracks)
+  })
   
   # GET GENE COORDINATES/OTHER INFO
   geneinfoevent <- observeEvent(input$getgeneinfo,{
@@ -103,13 +162,13 @@ server <- function(input, output) {
         chrgeneobj <- seqnames(grgene2)
         
         output$startcoor <- renderUI({
-          numericInput("startcoorload", label = h5("Start Coordinate"), value = startcoorobj)
+          numericInput("startcoorload", label = h5("Start"), value = startcoorobj)
         })
         output$endcoor <- renderUI({
-          numericInput("endcoorload", label = h5("End Coordinate"), value = endcoorobj)
+          numericInput("endcoorload", label = h5("End"), value = endcoorobj)
         })
         output$chrgene <- renderUI({
-          textInput("chrgeneload", label = h5("Gene Chromosome"), value = chrgeneobj)
+          textInput("chrgeneload", label = h5("Chrom."), value = chrgeneobj)
         })
       } else{
         output$txtgenomeviz <- renderUI({
@@ -130,6 +189,14 @@ server <- function(input, output) {
   # GENERATE GENOME VISUALIZATION
   dataanalysis <- observeEvent(input$viewgenome,{
     
+    withProgress(message = 'Calculating CG tracks',
+                 detail = 'This may take a while...', value = 0, {
+                   for (i in 1:15) {
+                     incProgress(1/15)
+                     Sys.sleep(0.25)
+                   }
+                 })
+    
     if(length(input$startcoorload)>0 &
        length(input$endcoorload)>0 &
        length(input$chrgeneload)>0 &
@@ -146,7 +213,7 @@ server <- function(input, output) {
       gtrack <- GenomeAxisTrack()
       itrack <- IdeogramTrack(genome = "hg19", chromosome = windowrange.chr)
       
-      tracklistusr <- list(gtrack,itrack); tracksizesusr <- c(1,1)
+      tracklistusr <- list(itrack,gtrack); tracksizesusr <- c(1,1)
       #====================================
       # get sequence, make cg track/table
       #====================================
@@ -345,6 +412,14 @@ server <- function(input, output) {
       
       
       # gene transcripts track
+      withProgress(message = 'Retrieving genome tracks',
+                   detail = 'This may take a while...', value = 0, {
+                     for (i in 1:15) {
+                       incProgress(1/15)
+                       Sys.sleep(0.25)
+                     }
+                   })
+      
       if("1" %in% input$trackoptions){
         biomTrack <- BiomartGeneRegionTrack(genome = "hg19",
                                             chromosome = windowrange.chr, 
@@ -389,13 +464,13 @@ server <- function(input, output) {
       #=============================
       # print title for genome visualiZation
       output$txtgenomeviz <- renderUI({
-        str.gviz <- paste0("Genome Visualization at: ",windowrange.chr,":",windowrange.start,"-",windowrange.end)
+        str.gviz <- paste0("Coordinates: ",windowrange.chr,":",windowrange.start,"-",windowrange.end)
         HTML(paste(h4(str.gviz)))
       })
       
       # plot genome visualization
       output$genomeviz <- renderPlot({
-        withProgress(message = 'Calculation in progress',
+        withProgress(message = 'Plotting genome tracks',
                      detail = 'This may take a while...', value = 0, {
                        for (i in 1:15) {
                          incProgress(1/15)
