@@ -15,6 +15,6 @@ This is a shiny app written in R. It relies heavily on several Bioconductor pack
 
 CGMappeR, including its code and generated results, is free to use for research purposes. It is offered with absolutely no warranty or guarantee, and it is the responsibility of the user to verify and/or validate any findings from using CGMappeR.
 
-## Thanks for your interest in this project, and happy mapping!
+### Thanks for your interest in this project, and happy mapping!
 
 #
