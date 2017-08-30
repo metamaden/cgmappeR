@@ -11,14 +11,14 @@ load("grgenes_symbols.rda");load("grgenes.rda");load("epic450anno.rda")
 source("cgbrowseR_functions.R")
 
 ui <- fluidPage(theme=shinytheme("cerulean"),
-                titlePanel(title=div(HTML(paste(h1("CGMappeR"))))),
+                titlePanel(title=div(HTML(paste(h1("CGMappeR (hg19)"))))),
                 sidebarPanel(width=4,
                   conditionalPanel(condition="input.conditionedPanels==2",
                                    helpText("Visualize CG dinucleotides, with tracks indicating coverage by CpG array probes, gene transcripts, and genome features."),
                                    dropdownButton(helpText(h5("1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.")),
-                                                  helpText(h5("2. Using dropdown menus, select tracks to visualize and fine tune image dimensions. (Note: CpG tracks are only shown if CpGs overlap with view window)")),
+                                                  helpText(h5("2. Using dropdown menus, select tracks to visualize and fine tune image dimensions. Optionally add a custom cursor using custom coordinates. (Note: CpG tracks are only shown if CpGs overlap with view window)")),
                                                   helpText(h5("3. Click View Genome button to load the genome ideogram at the indicated coordinates. (Note: this may take awhile)")),
-                                                  helpText(h5("4. View resultant ideogram (first tab) and CG dinucleotide table (second tab). Download the image by right-clicking, and download the table using the download button.")),
+                                                  helpText(h5("4. View resultant ideogram (first tab), CG dinucleotide table (second tab), CpG probe annotations table (third tab), and/or sequence in the selected window (fourth tab). Download the image by right-clicking, and download the tables using the download buttons.")),
                                                   circle=FALSE,
                                                   label=h6("Instructions"),width="500px",size="xs"),
                                    HTML('<hr style="color: black;">'),
