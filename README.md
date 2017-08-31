@@ -7,7 +7,7 @@ Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideo
 
 ![Example: TP53 gene region CGs/CpGs](https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG | =250x250)
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG" alt="Drawing" style="width: 200px;"/>
+<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG" alt="Drawing" style="width: 100px;"/>
 
 ## Instructions
 1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
