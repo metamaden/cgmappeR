@@ -5,7 +5,7 @@ R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
 
 Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideograms. 
 
-![Example: TP53 gene region CGs/CpGs](https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG){:width=200px}
+![Example: TP53 gene region CGs/CpGs|small](https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG){:width=200px}
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG" alt="Drawing" style="width: 500px;"/>
 
