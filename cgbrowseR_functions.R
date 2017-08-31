@@ -26,7 +26,8 @@ getAllDNseq <- function(windowrange.start,
 getCGtable <- function(windowrange.start,
                        windowrange.end,
                        windowrange.chr,
-                       dndf){
+                       dndf,
+                      epic450anno){
 
   # cg table to be returned in output
   ancpg <- epic450anno[epic450anno$chr==windowrange.chr &
