@@ -9,22 +9,22 @@ Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideo
 
 ## Instructions
 1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
-![Example: Load Gene Coordinates](/readme_content/readme_instructions1.JPG)
+![Example: Load Gene Coordinates](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions1.JPG)
 
 2. Using dropdown menus, select tracks to visualize and fine tune image dimensions. Optionally add a custom cursor using custom coordinates. (Note: CpG tracks are only shown if CpGs overlap with view window)
-![Example: Select Tracks](readme_instructions2.JPG)
+![Example: Select Tracks](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions2.JPG)
 
 3. Click View Genome button to load the genome ideogram at the indicated coordinates. (Note: this may take awhile)
-![Example: Loading Gviz](readme_instructions3.JPG)
+![Example: Loading Gviz](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions3.JPG)
 
 4. View resultant ideogram (first tab), CG dinucleotide table (second tab), CpG probe annotations table (third tab), and/or sequence in the selected window (fourth tab). 
-![Example: View Ideogram Tab](readme_instructions4.JPG)
-![Example: View CG Dinucleotides Table Tab](readme_instructions5.JPG)
-![Example: View CpG Probes Table Tab](readme_instructions6.JPG)
-![Example: View Sequence Tab](readme_instructions7.JPG)
+![Example: View Ideogram Tab](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions4.JPG)
+![Example: View CG Dinucleotides Table Tab](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions5.JPG)
+![Example: View CpG Probes Table Tab](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions6.JPG)
+![Example: View Sequence Tab](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions7.JPG)
 
 Download the image by right-clicking, and download the tables using the download buttons.
-![Example: Download CpG Probes Table](readme_instructions8.JPG)
+![Example: Download CpG Probes Table](https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions8.JPG)
 
 
 ## Citations
