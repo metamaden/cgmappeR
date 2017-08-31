@@ -26,7 +26,7 @@ Loading Gviz
 
 View Ideogram Tab
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions2.JPG" width="450">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions4.JPG" width="450">
 
 View CG Dinucleotides Table Tab
 
