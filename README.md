@@ -56,3 +56,6 @@ CGMappeR, including its code and generated results, is free to use for research 
 ### Thanks for your interest in this project, and happy mapping!
 
 #
+## NEWS/TODO
+### 1/20/18
+Ideas for additional features: CRXCG probes (cross-reactive probes) or optionally enable subtraction of CRXCG CpGs from viewed CpGs? Enable visualization of Methylation (eg. Beta) values from custom specified matrix. Clean up interface: Remove meaningless axis labels, touch-up proportions and consider options for automating proportion adjustment. Enable viewing of ENCODE enhancer data from UCSC or consider options for downloading objects locally.
