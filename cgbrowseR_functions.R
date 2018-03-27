@@ -72,3 +72,94 @@ getCGtable <- function(windowrange.start,
   
 }
 
+makeDtrackInfo <- function(dfi=read.csv("methyldf_test.csv"),
+                           plottype=c("a","p"),
+                           dtrackname="data track 1"){
+  # NOTE: need 3 columns labeled 'cpg', 'sampGroups', and 'methyl'
+  load("epic450anno.rda")
+  
+  if("sampID" %in% colnames(dfi)){
+    dfi.sgrp <- unique(dfi$sampGroups)
+    dfi.cpg <- unique(dfi$cpg)
+    
+    dfi.gr <- data.frame(matrix(nrow=length(dfi.cpg),ncol=1))
+    colnames(dfi.gr) <- "cpg"; dfi.gr$cpg <- dfi.cpg
+    
+    annoix <- epic450anno[epic450anno$Name %in% dfi.cpg,]
+    annoix <- annoix[order(match(annoix$Name,dfi.gr$cpg)),]
+    # identical(annoix$Name,dfi.gr$cpg)
+    
+    for(i in 1:length(dfi.sgrp)){
+      dfi.gi <- dfi[dfi$sampGroups==dfi.sgrp[i],]
+      pati <- unique(dfi.gi$sampID)
+      
+      # for each patient, cbind the data
+      for(j in 1:length(pati)){
+        dfi.patj <- dfi.gi[dfi.gi$sampID==pati[j],]
+        dfi.gr <- cbind(dfi.gr,dfi.patj$methyl)
+        colnames(dfi.gr)[length(colnames(dfi.gr))] <- paste0(dfi.sgrp[i],";",pati[j])
+        
+      }
+    }
+    dfi.gr$start <- annoix$pos; dfi.gr$chr <- annoix$chr; dfi.gr$end <- dfi.gr$start+1
+    gri <- makeGRangesFromDataFrame(dfi.gr,keep.extra.columns = T)
+    
+    #=================================================
+    # for data track, inc. option for multiple groups
+    if(length(dfi.sgrp)==1){
+      plottracki <- DataTrack(gri, 
+                              name = dtrackname,
+                              type=plottype)
+    } else{
+      plottracki <- DataTrack(gri, 
+                              name = dtrackname,
+                              groups=gsub("\\;.*","",colnames(mcols(gri))[-1]),
+                              legend=T,
+                              type=plottype)
+    }
+  }
+  else{
+    dfi.cpg <- unique(dfi$cpg)
+    anni <- epic450anno[epic450anno$Name %in% dfi.cpg,]
+    anni <- anni[order(match(anni$Name,as.character(unique(dfi$cpg)))),]
+    
+    dfi.sgrp <- as.character(unique(dfi$sampGroups))
+    
+    # init df to be turned into GRanges object
+    dfi.gr <- as.data.frame(matrix(nrow=length(dfi.cpg),ncol=1+length(dfi.sgrp))); 
+    colnames(dfi.gr) <- c("cpg",dfi.sgrp)
+    dfi.gr$cpg <- dfi.cpg;
+    # transform data so every row is a unique cpg
+    for(j in 2:(ncol(dfi.gr))){
+      grpj <- colnames(dfi.gr)[j]
+      for(x in 1:nrow(dfi.gr)){
+        cpgx <- dfi.gr$cpg[x]
+        dfi.gr[x,j] <- dfi[dfi$cpg==cpgx & dfi$sampGroups==grpj,]$methyl
+      }
+    }; 
+    # start, end, and chr for granges object
+    dfi.gr$start <- NA; dfi.gr$chr <- NA
+    for(a in 1:nrow(dfi.gr)){
+      aa <- anni[anni$Name==dfi.gr$cpg[a],]
+      dfi.gr$start[a] <- aa$pos; dfi.gr$chr[a] <- aa$chr
+    }; dfi.gr$end <- dfi.gr$start+1
+    # convert to granges object
+    gri <- makeGRangesFromDataFrame(dfi.gr,keep.extra.columns = T) # processed GRanges track to plot
+    
+    #=================================================
+    # for data track, inc. option for multiple groups
+    if(length(dfi.sgrp)==1){
+      plottracki <- DataTrack(gri, 
+                              name = dtrackname,
+                              type=plottype)
+    } else{
+      plottracki <- DataTrack(gri, 
+                              name = dtrackname,
+                              groups=dfi.sgrp,
+                              legend=T,
+                              type=plottype)
+    }
+  }
+  
+  return(plottracki)
+}
