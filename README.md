@@ -1,4 +1,4 @@
-# CGMappeR
+# CGMappeR v.1.2.0
 R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
 
 ## GUI 
@@ -59,3 +59,10 @@ CGMappeR, including its code and generated results, is free to use for research 
 ## NEWS/TODO
 ### 1/20/18
 Ideas for additional features: CRXCG probes (cross-reactive probes) or optionally enable subtraction of CRXCG CpGs from viewed CpGs? Enable visualization of Methylation (eg. Beta) values from custom specified matrix. Clean up interface: Remove meaningless axis labels, touch-up proportions and consider options for automating proportion adjustment. Enable viewing of ENCODE enhancer data from UCSC or consider options for downloading objects locally.
+
+### 3/27/18
+Massive v.1.2.0 update is live! New menu options, cleaner display (no meaningless y-axes), options to upload and visualize methylation data, faster TxDb gene mapping option, instructions for data upload, new default selections for tracks. 
+
+
+
+
