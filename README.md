@@ -14,8 +14,7 @@ biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens
 ## At the interactive prompt, enter 'n'
 ```
 
-4. Install the latest version of the cgmappeR app:
-`require(devtools);   install_github("metamaden/cgmappeR")`
+4. Install and expand the latest version of the cgmappeR app locally, from GitHub.
 
 5. Open R Studio and change current session to the main cgmappeR directory. Open the "app.R" script, and click "Run App" button.
 
