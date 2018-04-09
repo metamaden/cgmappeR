@@ -10,7 +10,7 @@ R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
 3. Install essential packages off Bioconductor:
 ```
 source("https://bioconductor.org/biocLite.R");   
-biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
+biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene","devtools"))
 ## At the interactive prompt, enter 'n'
 ```
 
