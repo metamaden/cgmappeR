@@ -5,12 +5,12 @@ R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
 1. Install the latest versions of [R](https://cran.r-project.org/) and [R Studio](https://www.rstudio.com/products/rstudio/download/).
 
 2. Install essential packages off CRAN:
-`install.packages(c("shiny","shinythemes","shinyWidgets"))`
+`install.packages(c("shiny","shinythemes","shinyWidgets","devtools"))`
 
 3. Install essential packages off Bioconductor:
 ```
 source("https://bioconductor.org/biocLite.R");   
-biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene","devtools"))
+biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
 ## At the interactive prompt, enter 'n'
 ```
 
