@@ -1,6 +1,22 @@
 # CGMappeR v.1.2.0
 R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
 
+## Download/Install instructions
+1. Install the latest versions of [R](https://cran.r-project.org/) and [R Studio](https://www.rstudio.com/products/rstudio/download/).
+
+2. Install essential packages off CRAN:
+`install.packages(c("shiny","shinythemes","shinyWidgets"))`
+
+3. Install essential packages off Bioconductor:
+`source("https://bioconductor.org/biocLite.R");   
+biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
+## At the interactive prompt, enter 'n'`
+
+4. Install the latest version of the cgmappeR app:
+`require(devtools);   install_github("metamaden/cgmappeR")`
+
+5. Open R Studio and change current session to the main cgmappeR directory. Open the "app.R" script, and click "Run App" button.
+
 ## GUI 
 
 Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideograms. 
