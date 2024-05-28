@@ -1,3 +1,5 @@
+![https://img.shields.io/badge/cgmappeR-v1.3.0-blue](https://img.shields.io/badge/cgmappeR-v1.3.0-blue)
+        
 # cgmappeR
 
 An R/Shiny dashboard to map and visualize cytosine-guanine (CG/CpG) dinucleotides and microarray-targeted probes.
