@@ -34,7 +34,7 @@ This installs dependencies from CRAN and Bioconductor. These include `shiny`, `s
 
 ## Run
 
-[![How to run the cgmappeR dashboard](https://img.youtube.com/vi/1UHkNqpbalw/0.jpg)](https://youtube.com/watch?v=1UHkNqpbalw "Run the shiny dashboard")
+[![How to run the cgmappeR dashboard](https://img.youtube.com/vi/1UHkNqpbalw/1.jpg)](https://youtube.com/watch?v=1UHkNqpbalw "Run the shiny dashboard")
 
 Run the dashboard from shell with:
 
@@ -50,8 +50,7 @@ Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideo
 
 ## Query
 
-
-[![How to query in cgmappeR](https://www.youtube.com/watch?v=1UHkNqpbalw/0.jpg)](https://www.youtube.com/watch?v=1UHkNqpbalw "Run a new cgmappeR query and inspect results")
+[![How to query in cgmappeR](https://www.youtube.com/watch?v=i0PvGU9R8RY/0.jpg)](https://www.youtube.com/watch?v=i0PvGU9R8RY "Run a new cgmappeR query and inspect results")
 
 Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
 
