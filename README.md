@@ -34,7 +34,7 @@ This installs dependencies from CRAN and Bioconductor. These include `shiny`, `s
 
 ## Run
 
-[![How to run the cgmappeR dashboard](https://youtube/1UHkNqpbalw/0.jpg)](https://youtube/1UHkNqpbalw "Run the shiny dashboard")
+[![How to run the cgmappeR dashboard](https://img.youtube.com/vi/1UHkNqpbalw/0.jpg)](https://youtube.com/watch?v=1UHkNqpbalw "Run the shiny dashboard")
 
 Run the dashboard from shell with:
 
