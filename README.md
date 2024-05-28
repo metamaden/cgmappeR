@@ -1,45 +1,91 @@
-# CGMappeR v.1.2.0
-R shiny app to map and visualize genomic CG dinucleotides and CpG probes.
+<title>"cgmappeR ReadMe" </title>
 
-## Download/Install instructions
-1. Install the latest versions of [R](https://cran.r-project.org/) and [R Studio](https://www.rstudio.com/products/rstudio/download/).
+<!-- badges: start -->
 
-2. Install essential packages off CRAN:
-`install.packages(c("shiny","shinythemes","shinyWidgets","devtools"))`
+[![Zotero]()
+[![R build status]()
 
-3. Install essential packages off Bioconductor:
+<!-- badges: end -->
+
+# cgmappeR
+
+An R/Shiny dashboard to map and visualize cytosine-guanine (CG/CpG) dinucleotides and microarray-targeted probes.
+
+# Cite
+
+To cite this tool, you may use the following: 
+
 ```
-source("https://bioconductor.org/biocLite.R");   
-biocLite(c("Gviz", "BSgenome.Hsapiens.UCSC.hg19", "org.Hs.eg.db", "TxDb.Hsapiens.UCSC.hg19.knownGene"))
-## At the interactive prompt, enter 'n'
 ```
 
-4. Install and expand the latest version of the cgmappeR app locally, from GitHub.
+# Tutorial
 
-5. Open R Studio and change current session to the main cgmappeR directory. Open the "app.R" script, and click "Run App" button.
+## Setup
 
-## GUI 
+Clone the latest version of `cgmappeR` from your terminal with:
+
+```
+git clone https://github.com/metamaden/cgmappeR"
+```
+
+Now install all dependencies by calling the script `cgmapper/inst/r/install.R`:
+
+```
+R ./inst/install.R
+```
+
+This installs dependencies from CRAN and Bioconductor. These include `shiny`, `shinythemes`, `shinyWidgets`, `devtools`, `Gviz`, `BSgenome.Hsapiens.UCSC.hg19`, `org.Hs.eg.db`, and `TxDb.Hsapiens.UCSC.hg19.knownGene`.
+
+## Run
+
+<video width="550" controls>
+    <source src="./inst/mp4/cgmappeR_run1_clip2.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+Run the dashboard from shell with:
+
+```
+Rscript ./cgmappeR/inst/run.R
+```
+
+<video width="550" controls>
+    <source src="./inst/mp4/cgmappeR_run1_clip2.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+The `cgmappeR` UI is reactive to user input, and will start with no input. Specify inputs such as the coordinate ranges and your input data using the menu options to the left.
 
 Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideograms. 
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG" width="500">
 
-## Instructions
-1. Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
+## Query
+
+<video width="550" controls>
+    <source src="./inst/mp4/cgmappeR_query1_clip1.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions1.JPG" height="350">
 
-2. Using dropdown menus, select tracks to visualize and fine tune image dimensions. Optionally add a custom cursor using custom coordinates. (Note: CpG tracks are only shown if CpGs overlap with view window)
+Using dropdown menus, select tracks to visualize and fine tune image dimensions. Optionally add a custom cursor using custom coordinates. (Note: CpG tracks are only shown if CpGs overlap with view window)
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions2.JPG" height="350">
 
-3. Click View Genome button to load the genome ideogram at the indicated coordinates. (Note: this may take awhile)
-
-Loading Gviz:
+Click View Genome button to load the genome ideogram at the indicated coordinates.
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions3.JPG" width="300">
 
-4. View resultant ideogram (first tab), CG dinucleotide table (second tab), CpG probe annotations table (third tab), and/or sequence in the selected window (fourth tab). 
+View resultant ideogram (first tab), CG dinucleotide table (second tab), CpG probe annotations table (third tab), and/or sequence in the selected window (fourth tab). 
+
+## Dashboard navigation
+
+The lefthand menu contains filter, query, import, and export options. 
+
+The different tabs will switch the display between complementary information for a specified view window, including ideogram plot, dinucleotide coordinates table, probe annotations, and genome sequence.
 
 View Ideogram Tab:
 
@@ -57,29 +103,18 @@ View Sequence Tab:
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions7.JPG" width="450">
 
+## View management
+
+Use the coordinates and other filters at the lefthand menu in order to modify the view window, such as shift upstream, downstream, expand the view window, or narrow the view window.
+
+## Import
+
+You may view your own probe data in the `cgmappeR` ideogram by selecting from the left menu.
+
+## Export
+
+You may save the probe annotations, dinucleotide coordinates, and sequence using the bottom-left menu options.
+
 Download the image by right-clicking, and download the tables using the download buttons.
 
 <img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions8.JPG" width="450">
-
-
-## Citations
-
-This is a shiny app written in R. It relies heavily on several Bioconductor packages, including Gviz, BSgenome.Hsapiens.UCSC.hg19, org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg19.knownGene, and manifests accessible in minfi. This app was designed using the shiny, shinythemes, and shinyWidgets packages.
-
-## Disclaimer
-
-CGMappeR, including its code and generated results, is free to use for research purposes. It is offered with absolutely no warranty or guarantee, and it is the responsibility of the user to verify and/or validate any findings from using CGMappeR.
-
-### Thanks for your interest in this project, and happy mapping!
-
-#
-## NEWS/TODO
-### 1/20/18
-Ideas for additional features: CRXCG probes (cross-reactive probes) or optionally enable subtraction of CRXCG CpGs from viewed CpGs? Enable visualization of Methylation (eg. Beta) values from custom specified matrix. Clean up interface: Remove meaningless axis labels, touch-up proportions and consider options for automating proportion adjustment. Enable viewing of ENCODE enhancer data from UCSC or consider options for downloading objects locally.
-
-### 3/27/18
-Massive v.1.2.0 update is live! New menu options, cleaner display (no meaningless y-axes), options to upload and visualize methylation data, faster TxDb gene mapping option, instructions for data upload, new default selections for tracks. 
-
-
-
-
