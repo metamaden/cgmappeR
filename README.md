@@ -46,23 +46,23 @@ The `cgmappeR` UI is reactive to user input, and will start with no input. Speci
 
 Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideograms. 
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/cgbrowseR_tp53exe.JPG" width="500">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/cgbrowseR_tp53exe.JPG" width="500">
 
 ## Query
 
-[![How to query in cgmappeR](https://www.img.youtube.com/vi/i0PvGU9R8RY/0.jpg)](https://www.youtube.com/watch?v=i0PvGU9R8RY "Run a new cgmappeR query and inspect results")
+[![How to query in cgmappeR](https://img.youtube.com/vi/i0PvGU9R8RY/0.jpg)](https://youtube.com/watch?v=i0PvGU9R8RY "Run a new cgmappeR query and inspect results")
 
 Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions1.JPG" height="350">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions1.JPG" height="350">
 
 Using dropdown menus, select tracks to visualize and fine tune image dimensions. Optionally add a custom cursor using custom coordinates. (Note: CpG tracks are only shown if CpGs overlap with view window)
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions2.JPG" height="350">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions2.JPG" height="350">
 
 Click View Genome button to load the genome ideogram at the indicated coordinates.
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions3.JPG" width="300">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions3.JPG" width="300">
 
 View resultant ideogram (first tab), CG dinucleotide table (second tab), CpG probe annotations table (third tab), and/or sequence in the selected window (fourth tab). 
 
@@ -74,19 +74,19 @@ The different tabs will switch the display between complementary information for
 
 View Ideogram Tab:
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions4.JPG" width="450">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions4.JPG" width="450">
 
 View CG Dinucleotides Table Tab:
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions5.JPG" width="450">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions5.JPG" width="450">
 
 View CpG Probes Table Tab:
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions6.JPG" width="450">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions6.JPG" width="450">
 
 View Sequence Tab:
 
-<img src="https://github.com/metamaden/cgmappeR/blob/master/readme_content/readme_instructions7.JPG" width="450">
+<img src="https://github.com/metamaden/cgmappeR/blob/master/inst/jpg/readme_instructions7.JPG" width="450">
 
 ## View management
 
