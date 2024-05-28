@@ -1,12 +1,3 @@
-<title>"cgmappeR ReadMe" </title>
-
-<!-- badges: start -->
-
-[![Zotero]()
-[![R build status]()
-
-<!-- badges: end -->
-
 # cgmappeR
 
 An R/Shiny dashboard to map and visualize cytosine-guanine (CG/CpG) dinucleotides and microarray-targeted probes.
@@ -16,9 +7,12 @@ An R/Shiny dashboard to map and visualize cytosine-guanine (CG/CpG) dinucleotide
 To cite this tool, you may use the following: 
 
 ```
+"cgmappeR". GitHub repository. Sean Maden. 2024.
 ```
 
 # Tutorial
+
+It is fast and easy to set up and run `cgmappeR`. This section details how.
 
 ## Setup
 
@@ -38,21 +32,15 @@ This installs dependencies from CRAN and Bioconductor. These include `shiny`, `s
 
 ## Run
 
-<video width="550" controls>
-    <source src="./inst/mp4/cgmappeR_run1_clip2.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+<iframe width="400"
+src="https://youtu.be/1UHkNqpbalw">
+</iframe>
 
 Run the dashboard from shell with:
 
 ```
 Rscript ./cgmappeR/inst/run.R
 ```
-
-<video width="550" controls>
-    <source src="./inst/mp4/cgmappeR_run1_clip2.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
 
 The `cgmappeR` UI is reactive to user input, and will start with no input. Specify inputs such as the coordinate ranges and your input data using the menu options to the left.
 
@@ -62,10 +50,9 @@ Iteratively map CG dinucleotides and Illumina CpG probe locations in genome ideo
 
 ## Query
 
-<video width="550" controls>
-    <source src="./inst/mp4/cgmappeR_query1_clip1.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
+<iframe width="400"
+src="https://www.youtube.com/watch?v=1UHkNqpbalw">
+</iframe>
 
 Enter a valid gene symbol, load its coordinates, and modify coordinates for the ideogram window.
 
