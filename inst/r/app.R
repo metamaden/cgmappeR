@@ -1,5 +1,5 @@
 #====================================
-# CgmappeR:
+# cgmappeR:
 # gviz interactive shinyR browser
 # author/maintainer: Sean Maden
 #====================================
@@ -39,10 +39,7 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                            column(4,dropdownButton(helpText(h4("Citations:")),
                                                  helpText(h6("This is a shiny app written in R. It relies heavily on several Bioconductor packages, including Gviz, BSgenome.Hsapiens.UCSC.hg19, org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg19.knownGene, and manifests accessible in minfi. This app was designed using the shiny, shinythemes, and shinyWidgets packages.")),
                                                  helpText(h4("Disclaimer:")),
-                                                 helpText(h6("CGMappeR, including its code and generated results, is free to use for research purposes. It is offered with absolutely no warranty or guarantee, and it is the responsibility of the user to verify and/or validate any findings from using CGMappeR.")),
-                                                 helpText(h4("Thanks for your interest in this project, and happy mapping!")),
-                                                 a(img(src="github-octocat.png",height=100,width=175,units="px"),alt="View CgmappeR on GitHub!",href="https://github.com/metamaden/cgmappeR"),
-                                                 #uiOutput("example"), # octo-cat Image, link to GitHub page...
+                                                 helpText(h6("cgmappeR, including its code and generated results, is free to use for research purposes. It is offered with absolutely no warranty or guarantee, and it is the responsibility of the user to verify and/or validate any findings from using cgmappeR.")),
                                                  circle=FALSE,
                                                  label=h6("More Info"),
                                                  width="500px"))),
@@ -64,8 +61,7 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                                    fluidRow(column(5,dropdownButton(helpText(h4("Methylation Data Display")),
                                                   helpText(h6("You can now upload your own methylation data, to display in cgmappeR with optional added tracks.")),
                                                   helpText(h4("Directions to Upload")),
-                                                  helpText(h6("Select a CSV (comma-separated file) to upload. The file needs 3 columns with the following titles: (1) 'cpg'; (2) 'sampGroups'; (3) 'methyl'. See the following example:")),
-                                                  img(src = "mdatExample.PNG"), # image needs to be in 'www' subdir
+                                                  helpText(h6("Select a CSV (comma-separated file) containing columns 'chr', 'start', 'stop', and columns containing group or sample data (e.g. 'groupA', 'sampleA', etc.).")),
                                                   helpText(h6("Note that you can upload a single CSV (plot a single track) or multiple CSVs (plot two tracks). If one CSV is uploaded, multiple sample group levels will automatically be detected, if present, and indicated in different colors.")),
                                                   helpText(h6("Finally, you can optionally include a column called 'sampID' to delineate multiple samples/patients in the same treatment group. These will be processed automatically.")),
                                                   fileInput(inputId="file1",label="Choose Methyl. Data CSV 1", # fileInput is the methyl data file (#1)
