@@ -6,24 +6,24 @@
 
 list.files()
 
-# shiny and cgmappeR dependencies:
-library(shiny)
-library(shinythemes)
-library(Gviz)
-library(shinyWidgets)
-
-# need these 2 modules for TxDb track:
-library(GenomicFeatures) 
-library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-
-# need this for genome sequence info:
-library(BSgenome.Hsapiens.UCSC.hg19)
+# dependencies
+libv <- c(
+  "shiny",
+  "shinythemes",
+  "Gviz",
+  "shinyWidgets",
+  "GenomicFeatures",
+  "TxDb.Hsapiens.UCSC.hg19.knownGene",
+  "BSgenome.Hsapiens.UCSC.hg19"
+)
+sapply(libv, library, character.only=TRUE)
 
 # load objects and source scripts
 load("../data/grgenes_symbols.rda")
 load("../data/grgenes.rda")
 load("../data/epic450anno.rda")
 source("../r/cgbrowseR_functions.R")
+source("../r/group_plot_functions.R")
 
 ui <- fluidPage(theme=shinytheme("cerulean"),
                 titlePanel(title=div(HTML(paste(h1("cgmappeR (hg19) v.1.3.0"))))),
@@ -158,6 +158,12 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
                              wellPanel(id = "tPanel",style = "overflow-y:scroll; max-height: 600px",
                                        htmlOutput("txtseq")), 
                              value=2),
+                    tabPanel("Import",
+                      h2("Dataset 1:"),
+                      dataTableOutput("import.table1"),
+                      h2("Dataset 2:"),
+                      dataTableOutput("import.table2"),
+                      value=2),
                     id = "conditionedPanels"
                   )
                 )
@@ -229,9 +235,9 @@ server <- function(input, output) {
     paste0("Coordinates: ",input$chrgeneload,":",input$startcoorload,"-",input$endcoorload)
   })
   
-  #=============================
+  #===============================
   # TAB: GENOMIC SEQUENCE DISPLAY
-  #=============================
+  #===============================
   output$txtseq <- renderUI({
     if(input$startcoorload<=input$endcoorload){
       txtseqtxt <- as.character(getSeq(BSgenome.Hsapiens.UCSC.hg19,
@@ -241,6 +247,28 @@ server <- function(input, output) {
       paste(unlist(strsplit(txtseqtxt,"")),collapse='')
     }
   },outputArgs=list(inline=TRUE))
+
+  #=========================
+  # TAB: INPUT TABLE DISPLAY
+  #=========================
+  readInputTable1 <- reactive({
+    if (is.null(input$file1))
+      return(NULL) 
+    inputTable1 <- read.csv(input$file1$datapath, header=TRUE) |> as.matrix()
+    return(inputTable1)
+  })
+  readInputTable2 <- reactive({
+    if (is.null(input$file2))
+      return(NULL) 
+    inputTable2 <- read.csv(input$file2$datapath, header=TRUE) |> as.matrix()
+    return(inputTable2)
+  })
+  output$import.table1 <- renderDataTable({
+    readInputTable1()
+  })
+  output$import.table2 <- renderDataTable({
+    readInputTable2()
+  })
   
   #==================================
   # GET GENE COORDINATES/OTHER INFO
@@ -272,9 +300,9 @@ server <- function(input, output) {
     }
   })
   
-  #==================================
+  #====================================
   # POPULATE GENE COORDINATE INTERFACE
-  #==================================
+  #====================================
   gettables <- observeEvent(input$loadgenecoordinates,{
     if(input$genesym2 %in% xx){
       if(names(xx[xx==input$genesym2]) %in% names(gx)){
@@ -313,6 +341,10 @@ server <- function(input, output) {
   # GENERATE GENOME VISUALIZATION
   #================================
   dataanalysis <- observeEvent(input$viewgenome,{
+    # dataanalysis
+    #
+    # Show the ideograms of genome tracks, track metadata, and user group data
+    #
     
     withProgress(message = 'Calculating CG tracks',
                  detail = 'This may take a while...', value = 0, {
@@ -564,8 +596,6 @@ server <- function(input, output) {
         tracklistusr <- c(tracklistusr,dTrack.cpg9); tracksizesusr <- c(tracksizesusr,1)
         }
       }
-      
-      
       # gene transcripts track
       withProgress(message = 'Retrieving genome tracks',
                    detail = 'This may take a while...', value = 0, {
@@ -574,7 +604,6 @@ server <- function(input, output) {
                        Sys.sleep(0.25)
                      }
                    })
-      
       if("5" %in% input$trackoptions){
       
         txTr <- GeneRegionTrack(TxDb.Hsapiens.UCSC.hg19.knownGene, 
@@ -586,8 +615,6 @@ server <- function(input, output) {
         # note: use slightly up-scaled ratio for feature-rich regions..
         tracklistusr <- c(tracklistusr,txTr); tracksizesusr <- c(tracksizesusr,5)
       }
-      
-      
       if("1" %in% input$trackoptions){
         biomTrack <- BiomartGeneRegionTrack(genome = "hg19",
                                             chromosome = windowrange.chr, 
@@ -631,16 +658,57 @@ server <- function(input, output) {
       #=============================
       # OUTPUT TO DATA ANALYSIS TAB
       #=============================
-      
       # print title for genome visualiZation
       output$txtgenomeviz <- renderUI({
         str.gviz <- paste0("Coordinates: ",windowrange.chr,":",windowrange.start,"-",windowrange.end)
         HTML(paste(h4(str.gviz)))
       })
-      
-      
-      
       # plot genome visualization
+      # DATA SET 1: for methyl. data csv file, store as data frame
+      methyldatainput1 <-reactive({ 
+        if (is.null(input$file1))
+          return(NULL)
+        newPlot1 <- get_group_plot(input$file1$datapath)
+        return(newPlot1)
+      })
+      
+      # DATA SET 2: for methyl. data csv file, store as data frame
+      methyldatainput2 <-reactive({ 
+        if (is.null(input$file2))
+          return(NULL)
+        newPlot2 <- get_group_plot(input$file2$datapath)
+        return(newPlot2)
+      })
+      
+      usrDataPlot <- reactive({
+        # usrDataPlot
+        #
+        # Reactively returns either NULL or gviz plot from DataTrack
+        data1 <- methyldatainput1()
+        data2 <- methyldatainput2()
+        if(is(data1, "DataTrack")){
+          tracklistusr <- c(tracklistusr, data1)
+          tracksizesusr <- c(tracksizesusr,3)
+        }
+        if(is(data2, "DataTrack")){
+          tracklistusr <- c(tracklistusr, data2)
+          tracksizesusr <- c(tracksizesusr,3)
+        }
+        usrDataCondition <- is(data1, "DataTrack")|is(data2, "DataTrack")
+        if(usrDataCondition){
+          plotTracks(
+            tracklistusr, from = windowrange.start, 
+            to = windowrange.end, cex = 0.8, 
+            sizes = tracksizesusr, type=c('p','l','b'))
+        } else{
+          plotTracks(
+            tracklistusr, from = windowrange.start, 
+            to = windowrange.end, cex = 0.8, 
+            sizes = tracksizesusr)
+        }
+        return(NULL)
+      })
+      
       output$genomeviz <- renderPlot({
         withProgress(message = 'Plotting genome tracks',
                      detail = 'This may take a while...', value = 0, {
@@ -649,64 +717,7 @@ server <- function(input, output) {
                          Sys.sleep(0.25)
                        }
                      })
-        
-        # DATA SET 1: for methyl. data csv file, store as data frame
-        methyldatainput1 <-reactive({ 
-          
-          if (is.null(input$file1))
-            return(NULL)                
-          
-          data1<-read.csv(input$file1$datapath)
-          data1
-        })
-        
-        # DATA SET 2: for methyl. data csv file, store as data frame
-        methyldatainput2 <-reactive({ 
-          
-          if (is.null(input$file2))
-            return(NULL)                
-          
-          data2<-read.csv(input$file2$datapath)
-          data2
-        })
-        
-        
-        #======================
-        # UPLOADED DATA TRACKS
-        #======================
-        if (!is.null(methyldatainput1())|!is.null(methyldatainput2())){
-          
-          if(!is.null(methyldatainput1())){
-            methyldata1.track <- makeDtrackInfo(dfi=methyldatainput1(),dtrackname = "usr input 1",plottype=c("a","p"))
-            tracklistusr <- c(tracklistusr,methyldata1.track); tracksizesusr <- c(tracksizesusr,3)
-          }
-          if(!is.null(methyldatainput2())){
-            methyldata2.track <- makeDtrackInfo(dfi=methyldatainput2(),dtrackname = "usr input 1",plottype=c("a","p"))
-            tracklistusr <- c(tracklistusr,methyldata2.track); tracksizesusr <- c(tracksizesusr,3)
-          }
-          
-          # plot with data track(s)
-          #plotTracks(tracklistusr, 
-          #           from = windowrange.start, 
-          #           to = windowrange.end, 
-          #           cex = 0.8,
-          #           sizes=tracksizesusr,
-          #           groups=unique(methyldatainput1()$sampGroups),
-          #           legend=T)
-          plotTracks(tracklistusr, 
-                     from = windowrange.start, 
-                     to = windowrange.end, 
-                     cex = 0.8,
-                     sizes=tracksizesusr)
-        
-          } else{
-            # plot without data track(s)
-            plotTracks(tracklistusr, 
-                     from = windowrange.start, 
-                     to = windowrange.end, 
-                     cex = 0.8,
-                     sizes=tracksizesusr)
-        }
+        usrDataPlot()
       },
       height=input$gvizheight,width=input$gvizwidth
       )
@@ -758,6 +769,7 @@ server <- function(input, output) {
       
     }
   })
+  
 }
 
 
